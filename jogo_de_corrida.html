@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Corrida - Auto Faucet</title>
+    <!-- Scripts de Anúncios -->
+    <script>
+        (function(alct){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = alct || {};
+            s.src = "//shortterm-garden.com/beX-V.sdduGNlZ0KYaWacN/Je_mW9/u/ZBUqlxktPITMYay/N/zIEn2pNgDuAutiNjjTIs3xMwTYY-0gMkQI";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+        })({})
+    </script>
+    <script>
+        (function(wtqqm){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = wtqqm || {};
+            s.src = "//shortterm-garden.com/bYXPV.sVdwGsl_0yYhWxcp/jeGmT9mu/ZhUBlvkXPgTwY/y/Njz/ELznNQDAQutbNQjtIR3dMLTKM/0nNhQg";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+        })({})
+    </script>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-right: 200px;
+        }
+        h1 {
+            color: #00ccff;
+            text-shadow: 0 0 10px #00ccff;
+            margin: 20px 0 10px;
+        }
+        .wallet-info {
+            color: #00ff88;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+            white-space: pre-line;
+        }
+        canvas {
+            border: 2px solid #00ff88;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2a2a2a;
+            padding: 20px;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        .game-over h2 {
+            color: #ff4444;
+            margin: 0 0 10px;
+        }
+        .game-over button {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .game-over button:hover {
+            background: linear-gradient(45deg, #00aaff, #00cc66);
+        }
+        .history-panel {
+            position: fixed;
+            right: 0;
+            top: 600px;
+            width: 200px;
+            background-color: #2a2a2a;
+            border-left: 2px solid #00ff88;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 255, 136, 0.3);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-panel h3 {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin: 0 0 10px;
+            text-align: center;
+        }
+        .history-panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: #e0e0e0;
+        }
+        .history-panel li {
+            padding: 5px 0;
+            border-bottom: 1px solid #3a3a3a;
+            font-size: 0.9em;
+        }
+        .history-panel li:last-child {
+            border-bottom: none;
+        }
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background-color: #2a2a2a;
+            border-left: 2px solid #00ccff;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 204, 255, 0.3);
+        }
+        .sidebar h2 {
+            color: #00ccff;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .sidebar select {
+            width: 100%;
+            padding: 10px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .sidebar select:focus {
+            outline: none;
+            border-color: #00aaff;
+        }
+        .return-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #ffcc00, #ff9900);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .return-btn:hover {
+            background: linear-gradient(45deg, #ff9900, #ff6600);
+        }
+        footer {
+            margin-top: 20px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2 id="lang-title">Selecionar Idioma</h2>
+        <select id="languageSelect">
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+        </select>
+        <a class='return-btn' href='/' id='return-btn'>Voltar</a>
+    </div>
+    <div class="history-panel" id="history-panel">
+        <h3 id="history-title">Histórico</h3>
+        <ul id="history-list"></ul>
+    </div>
+    <h1 id="title">Jogo de Corrida</h1>
+    <div class="wallet-info" id="wallet-info"></div>
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    <div class="game-over" id="gameOver">
+        <h2 id="game-over-title">Game Over</h2>
+        <button id="restartBtn">Reiniciar</button>
+    </div>
+    <footer id="footer">© 2025 Auto Faucet. Todos os direitos reservados.</footer>
+
+    <script>
+        const translations = {
+            pt: {
+                title: "Jogo de Corrida",
+                walletBalance: "Saldo: R$ ",
+                footer: "© 2025 Auto Faucet. Todos os direitos reservados.",
+                langTitle: "Selecionar Idioma",
+                returnBtn: "Voltar",
+                historyTitle: "Histórico",
+                welcomeMessage: "Bem-vindo, ",
+                noWalletConnected: "Nenhuma carteira conectada",
+                coinMessage: "Moeda coletada: R$ ",
+                gameOverTitle: "Game Over",
+                restartBtn: "Reiniciar",
+                adMessage: "Anúncio exibido após 10 moedas coletadas"
+            },
+            en: {
+                title: "Racing Game",
+                walletBalance: "Balance: R$ ",
+                footer: "© 2025 Auto Faucet. All rights reserved.",
+                langTitle: "Select Language",
+                returnBtn: "Return",
+                historyTitle: "History",
+                welcomeMessage: "Welcome, ",
+                noWalletConnected: "No wallet connected",
+                coinMessage: "Coin collected: R$ ",
+                gameOverTitle: "Game Over",
+                restartBtn: "Restart",
+                adMessage: "Ad displayed after 10 coins collected"
+            },
+            es: {
+                title: "Juego de Carrera",
+                walletBalance: "Saldo: R$ ",
+                footer: "© 2025 Auto Faucet. Todos los derechos reservados.",
+                langTitle: "Seleccionar Idioma",
+                returnBtn: "Volver",
+                historyTitle: "Historial",
+                welcomeMessage: "Bienvenido, ",
+                noWalletConnected: "Ninguna cartera conectada",
+                coinMessage: "Moneda recolectada: R$ ",
+                gameOverTitle: "Fin del Juego",
+                restartBtn: "Reiniciar",
+                adMessage: "Anuncio mostrado después de 10 monedas recolectadas"
+            },
+            fr: {
+                title: "Jeu de Course",
+                walletBalance: "Solde: R$ ",
+                footer: "© 2025 Auto Faucet. Tous droits réservés.",
+                langTitle: "Sélectionner la Langue",
+                returnBtn: "Retour",
+                historyTitle: "Historique",
+                welcomeMessage: "Bienvenue, ",
+                noWalletConnected: "Aucun portefeuille connecté",
+                coinMessage: "Pièce collectée: R$ ",
+                gameOverTitle: "Jeu Terminé",
+                restartBtn: "Redémarrer",
+                adMessage: "Annonce affichée après 10 pièces collectées"
+            },
+            de: {
+                title: "Rennspiel",
+                walletBalance: "Kontostand: R$ ",
+                footer: "© 2025 Auto Faucet. Alle Rechte vorbehalten.",
+                langTitle: "Sprache Auswählen",
+                returnBtn: "Zurück",
+                historyTitle: "Verlauf",
+                welcomeMessage: "Willkommen, ",
+                noWalletConnected: "Kein Wallet verbunden",
+                coinMessage: "Münze gesammelt: R$ ",
+                gameOverTitle: "Spiel Vorbei",
+                restartBtn: "Neustart",
+                adMessage: "Anzeige nach 10 gesammelten Münzen angezeigt"
+            }
+        };
+
+        let walletBalance = parseFloat(localStorage.getItem('walletBalance')) || 0;
+        if (isNaN(walletBalance)) {
+            walletBalance = 0;
+            localStorage.setItem('walletBalance', walletBalance);
+        }
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        let coinCount = parseInt(localStorage.getItem('coinCount')) || 0; // Contador de moedas coletadas
+        const adUrl = 'https://noxiouscombination.com/bu3/VR0.Pt3wpIvybQm/VwJyZPD/0j2/M/j_csz/N/DoUV0qLZT/Yyy/NWz/Mo0/N-TvUi'; // URL do anúncio
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const trackWidth = 400; // Largura da pista
+        const trackX = (canvas.width - trackWidth) / 2; // Centralizar a pista
+        const player = {
+            x: canvas.width / 2 - 20,
+            y: canvas.height - 40,
+            width: 40,
+            height: 40,
+            speed: 5
+        };
+        let obstacles = [];
+        let coins = [];
+        let gameOver = false;
+        let keys = {};
+        const coinValue = 0.0001; // Novo valor da moeda: R$ 0.0001
+        let trackOffset = 0; // Para rolagem das faixas
+        const trackSpeed = 3; // Velocidade de rolagem da pista
+
+        function drawTrack() {
+            // Desenhar grama (bordas)
+            ctx.fillStyle = '#00aa00';
+            ctx.fillRect(0, 0, trackX, canvas.height); // Esquerda
+            ctx.fillRect(trackX + trackWidth, 0, trackX, canvas.height); // Direita
+
+            // Desenhar estrada
+            ctx.fillStyle = '#555555';
+            ctx.fillRect(trackX, 0, trackWidth, canvas.height);
+
+            // Desenhar faixas brancas
+            ctx.fillStyle = '#ffffff';
+            const dashHeight = 20;
+            const dashSpacing = 20;
+            const totalDashHeight = dashHeight + dashSpacing;
+            for (let y = trackOffset % totalDashHeight; y < canvas.height; y += totalDashHeight) {
+                ctx.fillRect(canvas.width / 2 - 5, y, 10, dashHeight);
+            }
+            trackOffset = (trackOffset + trackSpeed) % totalDashHeight; // Atualizar rolagem
+        }
+
+        function updateWalletInfo() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            const userName = localStorage.getItem('userName');
+            const contactInfo = localStorage.getItem('contactInfo');
+            let userDisplay = userName || contactInfo || '';
+            if (userDisplay) {
+                document.getElementById('wallet-info').textContent = 
+                    `${lang.welcomeMessage}${userDisplay}\n${lang.walletBalance}${walletBalance.toFixed(8)}`;
+            } else {
+                document.getElementById('wallet-info').textContent = 
+                    `${lang.noWalletConnected}\n${lang.walletBalance}${walletBalance.toFixed(8)}`;
+            }
+            updateHistoryPanel();
+        }
+
+        function updateHistoryPanel() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            document.getElementById('history-title').textContent = lang.historyTitle;
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            history.forEach(entry => {
+                const date = new Date(entry.timestamp);
+                const formattedDate = date.toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const li = document.createElement('li');
+                li.textContent = `${formattedDate}: ${entry.message}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        function spawnObstacle() {
+            const x = trackX + Math.random() * (trackWidth - 30);
+            obstacles.push({ x: x, y: -30, width: 30, height: 30, speed: 3 });
+        }
+
+        function spawnCoin() {
+            const x = trackX + Math.random() * (trackWidth - 20);
+            coins.push({ x: x, y: -20, width: 20, height: 20, speed: 3 });
+        }
+
+        function detectCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                   rect1.x + rect1.width > rect2.x &&
+                   rect1.y < rect2.y + rect2.height &&
+                   rect1.y + rect1.height > rect2.y;
+        }
+
+        function showAd() {
+            window.open(adUrl, '_blank'); // Abre o anúncio em uma nova aba
+            const lang = translations[document.getElementById('languageSelect').value];
+            history.push({
+                timestamp: new Date().toISOString(),
+                message: lang.adMessage,
+                type: 'ad',
+                balance: walletBalance
+            });
+            localStorage.setItem('history', JSON.stringify(history));
+            updateHistoryPanel();
+        }
+
+        // Controle por mouse
+        canvas.addEventListener('mousemove', (e) => {
+            if (!gameOver) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left; // Posição X do mouse relativa ao canvas
+                // Restringir a posição do jogador à pista
+                player.x = Math.max(trackX, Math.min(trackX + trackWidth - player.width, mouseX - player.width / 2));
+            }
+        });
+
+        function gameLoop() {
+            if (gameOver) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenhar pista
+            drawTrack();
+
+            // Desenhar jogador (carro)
+            ctx.fillStyle = '#00ccff';
+            ctx.font = '30px Arial';
+            ctx.fillText('🚗', player.x, player.y + 30);
+
+            // Mover jogador (mantendo controle por teclado como opcional)
+            if (keys['ArrowLeft'] || keys['a']) {
+                player.x = Math.max(trackX, player.x - player.speed);
+            }
+            if (keys['ArrowRight'] || keys['d']) {
+                player.x = Math.min(trackX + trackWidth - player.width, player.x + player.speed);
+            }
+
+            // Atualizar obstáculos
+            obstacles.forEach(obstacle => {
+                obstacle.y += obstacle.speed;
+                ctx.fillStyle = '#ff4444';
+                ctx.font = '30px Arial';
+                ctx.fillText('🚧', obstacle.x, obstacle.y + 30);
+                if (detectCollision(player, obstacle)) {
+                    gameOver = true;
+                    document.getElementById('gameOver').style.display = 'block';
+                }
+            });
+            obstacles = obstacles.filter(obstacle => obstacle.y < canvas.height);
+
+            // Atualizar moedas
+            coins.forEach((coin, index) => {
+                coin.y += coin.speed;
+                ctx.fillStyle = '#ffcc00';
+                ctx.font = '20px Arial';
+                ctx.fillText('💰', coin.x, coin.y + 20);
+                if (detectCollision(player, coin)) {
+                    walletBalance += coinValue;
+                    coinCount += 1; // Incrementa o contador de moedas
+                    localStorage.setItem('walletBalance', walletBalance);
+                    localStorage.setItem('coinCount', coinCount);
+                    const lang = translations[document.getElementById('languageSelect').value];
+                    history.push({
+                        timestamp: new Date().toISOString(),
+                        message: `${lang.coinMessage}${coinValue.toFixed(8)}`,
+                        type: 'coin',
+                        balance: walletBalance
+                    });
+                    localStorage.setItem('history', JSON.stringify(history));
+                    coins.splice(index, 1);
+                    updateWalletInfo();
+
+                    // Verifica se 10 moedas foram coletadas
+                    if (coinCount >= 10) {
+                        showAd();
+                        coinCount = 0; // Reseta o contador
+                        localStorage.setItem('coinCount', coinCount);
+                    }
+                }
+            });
+            coins = coins.filter(coin => coin.y < canvas.height); // Corrigido o erro de digitação 'coinss'
+
+            // Gerar novos obstáculos e moedas
+            if (Math.random() < 0.02) spawnObstacle();
+            if (Math.random() < 0.01) spawnCoin();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resetGame() {
+            player.x = canvas.width / 2 - 20;
+            obstacles = [];
+            coins = [];
+            gameOver = false;
+            trackOffset = 0;
+            document.getElementById('gameOver').style.display = 'none';
+            gameLoop();
+        }
+
+        function changeLanguage() {
+            const langCode = document.getElementById('languageSelect').value;
+            if (translations[langCode]) {
+                localStorage.setItem('language', langCode);
+                const lang = translations[langCode];
+                document.getElementById('title').textContent = lang.title;
+                document.getElementById('footer').textContent = lang.footer;
+                document.getElementById('lang-title').textContent = lang.langTitle;
+                document.getElementById('return-btn').textContent = lang.returnBtn;
+                document.getElementById('game-over-title').textContent = lang.gameOverTitle;
+                document.getElementById('restartBtn').textContent = lang.restartBtn;
+                updateWalletInfo();
+            } else {
+                console.warn(`Idioma inválido: ${langCode}`);
+                document.getElementById('languageSelect').value = 'pt';
+                localStorage.setItem('language', 'pt');
+                changeLanguage();
+            }
+        }
+
+        function initLanguage() {
+            const savedLanguage = localStorage.getItem('language');
+            const validLanguages = Object.keys(translations);
+            const defaultLanguage = 'pt';
+            document.getElementById('languageSelect').value = validLanguages.includes(savedLanguage) ? savedLanguage : defaultLanguage;
+            changeLanguage();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        document.getElementById('restartBtn').addEventListener('click', resetGame);
+        document.getElementById('languageSelect').addEventListener('change', changeLanguage);
+
+        updateWalletInfo();
+        initLanguage();
+        gameLoop();
+    </script>
+    <!-- Code injected by live-server -->
+    <script>
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function () {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function (msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        }
+        else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+        // ]]>
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anuncie - Auto Faucet</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #00ccff;
+            text-shadow: 0 0 10px #00ccff;
+            margin: 20px 0;
+        }
+        .ad-container {
+            width: 80%;
+            max-width: 600px;
+        }
+        .ad-slot {
+            background-color: #2a2a2a;
+            border: 1px solid #00ff88;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .ad-slot a {
+            color: #00ff88;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .ad-slot a:hover {
+            color: #00cc66;
+        }
+        .click-counter {
+            color: #ff9900;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .wallet-info {
+            color: #00ff88;
+            font-size: 1.1em;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title">Anúncios</h1>
+    <div class="wallet-info" id="wallet-info"></div>
+    <div class="ad-container" id="ad-container"></div>
+    <footer>© 2025 Auto Faucet. Todos os direitos reservados.</footer>
+
+    <script>
+        let walletBalance = parseFloat(localStorage.getItem('walletBalance')) || 0;
+        let ads = JSON.parse(localStorage.getItem('ads')) || [];
+        const userId = localStorage.getItem('contactInfo') || localStorage.getItem('userName') || 'Anonymous';
+        let redirectTriggered = false; // Evita múltiplos redirecionamentos
+
+        function updateWalletInfo() {
+            document.getElementById('wallet-info').textContent = `Saldo: R$ ${walletBalance.toFixed(6)}`;
+        }
+
+        function getRandomAdLink() {
+            const activeAds = ads.filter(ad => ad.status === 'active' && ad.clicks < ad.maxClicks);
+            if (activeAds.length > 0) {
+                const randomIndex = Math.floor(Math.random() * activeAds.length);
+                return activeAds[randomIndex].siteLink;
+            }
+            return 'https://example.com'; // Substitua por um link de anúncio padrão
+        }
+
+        function renderAds() {
+            const container = document.getElementById('ad-container');
+            container.innerHTML = '';
+            const activeAds = ads.filter(ad => ad.status === 'active' && ad.clicks < ad.maxClicks).slice(0, 10);
+            activeAds.forEach(ad => {
+                const div = document.createElement('div');
+                div.className = 'ad-slot';
+                const link = document.createElement('a');
+                link.href = ad.siteLink;
+                link.textContent = ad.siteName;
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    ad.clicks += 1;
+                    walletBalance += 0.001;
+                    localStorage.setItem('ads', JSON.stringify(ads));
+                    localStorage.setItem('walletBalance', walletBalance);
+                    updateWalletInfo();
+                    window.open(ad.siteLink, '_blank');
+                };
+                div.appendChild(link);
+                if (userId === ad.advertiser) {
+                    const counter = document.createElement('div');
+                    counter.className = 'click-counter';
+                    counter.textContent = `Cliques: ${ad.clicks}/${ad.maxClicks}`;
+                    div.appendChild(counter);
+                }
+                container.appendChild(div);
+            });
+
+            // Preencher slots restantes com placeholders
+            for (let i = activeAds.length; i < 10; i++) {
+                const div = document.createElement('div');
+                div.className = 'ad-slot';
+                div.textContent = 'Espaço para Anúncio';
+                
+                // Adicionar temporizador para redirecionamento após 40 segundos
+                setTimeout(() => {
+                    if (!redirectTriggered) {
+                        redirectTriggered = true;
+                        const adLink = getRandomAdLink();
+                        window.open(adLink, '_blank');
+                    }
+                }, 40000); // 40 segundos
+
+                container.appendChild(div);
+            }
+        }
+
+        updateWalletInfo();
+        renderAds();
+    </script>
+</body>
+</html>

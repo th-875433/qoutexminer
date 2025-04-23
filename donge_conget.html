@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donkey Kong - Auto Faucet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #00ccff;
+            text-shadow: 0 0 10px #00ccff;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        .balance {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .back-btn, .jump-btn {
+            background-color: #ff4444;
+            color: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin: 10px;
+            text-decoration: none;
+        }
+        .jump-btn {
+            background-color: #00ccff;
+        }
+        .back-btn:hover {
+            background-color: #cc3333;
+        }
+        .jump-btn:hover {
+            background-color: #0099cc;
+        }
+        footer {
+            margin-top: 20px;
+            color: #888;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Donkey Kong - Auto Faucet</h1>
+    <div class="balance">Saldo: R$ <span id="balance">0.000000</span></div>
+    <button class="jump-btn" onclick="playerJump()" aria-label="Pular">Pular</button>
+    <a href="./index.html" class="back-btn" aria-label="Voltar para a página inicial">Voltar</a>
+    <footer>© 2025 Auto Faucet. Todos os direitos reservados.</footer>
+
+    <script>
+        let walletBalance = parseFloat(localStorage.getItem('walletBalance')) || 0;
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        let player;
+        let platforms = [];
+        let skunks = [];
+        let coins = [];
+        let score = 0;
+        let coinValue = 0; // Valor em reais
+        let gameOver = false;
+        let scrollSpeed = -3;
+
+        function updateBalanceDisplay() {
+            document.getElementById('balance').textContent = walletBalance.toFixed(6);
+            localStorage.setItem('walletBalance', walletBalance);
+        }
+
+        window.onload = function() {
+            if (!window.p5) {
+                alert("Erro ao carregar a biblioteca p5.js. Verifique sua conexão ou tente novamente.");
+            }
+            updateBalanceDisplay();
+        };
+
+        function setup() {
+            createCanvas(min(windowWidth - 40, 600), 400);
+            player = new Player();
+            platforms.push(new Platform(0, 350, 600));
+            platforms.push(new Platform(50, 250, 500));
+            platforms.push(new Platform(0, 150, 600));
+        }
+
+        function draw() {
+            background(50);
+            fill(255);
+            textSize(16);
+            text(`Pontuação: ${score}`, 10, 20);
+            text(`Valor Coletado: R$ ${coinValue.toFixed(6)}`, 10, 40);
+
+            if (gameOver) {
+                fill(255, 0, 0);
+                textSize(32);
+                textAlign(CENTER);
+                text("Game Over!", width / 2, height / 2);
+                text(`Pontuação Final: ${score}`, width / 2, height / 2 + 40);
+                text(`Valor Final: R$ ${coinValue.toFixed(6)}`, width / 2, height / 2 + 80);
+                text("Pressione R para reiniciar", width / 2, height / 2 + 120);
+                return;
+            }
+
+            player.update();
+            player.show();
+
+            for (let platform of platforms) {
+                platform.update();
+                platform.show();
+            }
+
+            if (frameCount % 60 === 0 && skunks.length < 5) {
+                skunks.push(new Skunk());
+            }
+            if (frameCount % 30 === 0 && coins.length < 10) {
+                coins.push(new Coin());
+            }
+
+            for (let i = skunks.length - 1; i >= 0; i--) {
+                skunks[i].update();
+                skunks[i].show();
+                if (skunks[i].hits(player) && !player.isAttacking) {
+                    gameOver = true;
+                }
+                if (player.isAttacking && skunks[i].hitsSword(player)) {
+                    skunks.splice(i, 1);
+                    score += 5; // Bônus por derrotar inimigo
+                }
+                if (skunks[i].offscreen()) {
+                    skunks.splice(i, 1);
+                }
+            }
+
+            for (let i = coins.length - 1; i >= 0; i--) {
+                coins[i].update();
+                coins[i].show();
+                if (coins[i].hits(player)) {
+                    score += 10;
+                    coinValue += 0.000003; // Atualizado para R$ 0.000003 por moeda
+                    walletBalance += 0.000003; // Atualiza o saldo da carteira
+                    history.push({
+                        timestamp: new Date().toISOString(),
+                        message: `Coletou R$ 0.000003 em Donkey Kong`,
+                        type: 'game_reward',
+                        balance: walletBalance
+                    });
+                    localStorage.setItem('history', JSON.stringify(history));
+                    updateBalanceDisplay();
+                    coins.splice(i, 1);
+                }
+                if (coins[i].offscreen()) {
+                    coins.splice(i, 1);
+                }
+            }
+        }
+
+        function keyPressed() {
+            if (key === ' ' && player.onGround) {
+                player.jump();
+            }
+            if (key === 'r' && gameOver) {
+                score = 0;
+                coinValue = 0;
+                gameOver = false;
+                skunks = [];
+                coins = [];
+                player = new Player();
+            }
+        }
+
+        function mousePressed() {
+            player.attack();
+            return false;
+        }
+
+        function touchStarted() {
+            if (player.onGround) {
+                player.jump();
+            }
+            return false;
+        }
+
+        function playerJump() {
+            if (player.onGround) {
+                player.jump();
+            }
+        }
+
+        class Player {
+            constructor() {
+                this.x = 100;
+                this.y = 330;
+                this.w = 30;
+                this.h = 40;
+                this.vx = 0;
+                this.vy = 0;
+                this.gravity = 0.5;
+                this.jumpForce = -10;
+                this.speed = 5;
+                this.onGround = false;
+                this.isAttacking = false;
+                this.attackAngle = 0;
+                this.attackDuration = 20;
+                this.attackTimer = 0;
+            }
+
+            update() {
+                this.vx = 0;
+                if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+                    this.vx = -this.speed;
+                }
+                if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+                    this.vx = this.speed;
+                }
+                this.x += this.vx;
+
+                if (this.x < 0) this.x = 0;
+                if (this.x > width - this.w) this.x = width - this.w;
+
+                this.vy += this.gravity;
+                this.y += this.vy;
+
+                this.onGround = false;
+                for (let platform of platforms) {
+                    if (this.x + this.w > platform.x && this.x < platform.x + platform.w &&
+                        this.y + this.h > platform.y && this.y + this.h < platform.y + 10 &&
+                        this.vy > 0) {
+                        this.y = platform.y - this.h;
+                        this.vy = 0;
+                        this.onGround = true;
+                    }
+                }
+
+                if (this.y > height - this.h) {
+                    this.y = height - this.h;
+                    this.vy = 0;
+                    this.onGround = true;
+                }
+
+                if (this.isAttacking) {
+                    this.attackTimer++;
+                    this.attackAngle += 0.5;
+                    if (this.attackTimer > this.attackDuration) {
+                        this.isAttacking = false;
+                        this.attackTimer = 0;
+                    }
+                }
+            }
+
+            show() {
+                push();
+                translate(this.x, this.y);
+                fill(139, 69, 19);
+                rect(5, 10, 20, 30, 5);
+                rect(0, 15, 5, 15);
+                rect(25, 15, 5, 15);
+                rect(8, 30, 6, 10);
+                rect(16, 30, 6, 10);
+                ellipse(15, 10, 15, 15);
+                fill(210, 180, 140);
+                ellipse(15, 12, 10, 10);
+                fill(0);
+                ellipse(12, 10, 3, 3);
+                ellipse(18, 10, 3, 3);
+                fill(255);
+                arc(15, 15, 6, 4, 0, PI);
+
+                if (this.isAttacking) {
+                    push();
+                    translate(15, 20);
+                    rotate(this.attackAngle);
+                    stroke(255, 0, 0);
+                    strokeWeight(3);
+                    line(0, 0, 20, 0);
+                    pop();
+                }
+                pop();
+            }
+
+            jump() {
+                this.vy = this.jumpForce;
+                this.onGround = false;
+            }
+
+            attack() {
+                if (!this.isAttacking) {
+                    this.isAttacking = true;
+                    this.attackTimer = 0;
+                    this.attackAngle = 0;
+                }
+            }
+        }
+
+        class Platform {
+            constructor(x, y, w) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = 10;
+            }
+
+            update() {
+                this.x += scrollSpeed;
+                if (this.x + this.w < 0) {
+                    this.x = width;
+                }
+            }
+
+            show() {
+                fill(255, 255, 0);
+                rect(this.x, this.y, this.w, this.h);
+            }
+        }
+
+        class Skunk {
+            constructor() {
+                this.x = width;
+                this.y = random([130, 230, 330]);
+                this.w = 20;
+                this.h = 20;
+                this.vx = scrollSpeed;
+                this.vy = 0;
+                this.gravity = 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.vy += this.gravity;
+                this.y += this.vy;
+
+                for (let platform of platforms) {
+                    if (this.x + this.w > platform.x && this.x < platform.x + platform.w &&
+                        this.y + this.h > platform.y && this.y + this.h < platform.y + 10 &&
+                        this.vy > 0) {
+                        this.y = platform.y - this.h;
+                        this.vy = 0;
+                    }
+                }
+            }
+
+            show() {
+                push();
+                translate(this.x, this.y);
+                fill(0);
+                rect(2, 5, 16, 10, 3);
+                fill(255);
+                rect(2, 5, 16, 4);
+                fill(0);
+                ellipse(18, 8, 8, 8);
+                fill(255);
+                ellipse(17, 7, 2, 2);
+                ellipse(19, 7, 2, 2);
+                triangle(2, 8, 0, 5, 0, 11);
+                pop();
+            }
+
+            hits(player) {
+                return (this.x < player.x + player.w &&
+                        this.x + this.w > player.x &&
+                        this.y < player.y + player.h &&
+                        this.y + this.h > player.y);
+            }
+
+            hitsSword(player) {
+                let swordX = player.x + 15 + 10 * cos(player.attackAngle);
+                let swordY = player.y + 20 + 10 * sin(player.attackAngle);
+                let swordW = 20;
+                let swordH = 5;
+                return (this.x < swordX + swordW / 2 &&
+                        this.x + this.w > swordX - swordW / 2 &&
+                        this.y < swordY + swordH / 2 &&
+                        this.y + this.h > swordY - swordH / 2);
+            }
+
+            offscreen() {
+                return this.x < -this.w;
+            }
+        }
+
+        class Coin {
+            constructor() {
+                this.x = width;
+                this.y = random([120, 220, 320]);
+                this.w = 10;
+                this.h = 10;
+                this.vx = scrollSpeed;
+            }
+
+            update() {
+                this.x += this.vx;
+            }
+
+            show() {
+                fill(255, 255, 0);
+                ellipse(this.x + this.w / 2, this.y + this.h / 2, this.w, this.h);
+            }
+
+            hits(player) {
+                return (this.x < player.x + player.w &&
+                        this.x + this.w > player.x &&
+                        this.y < player.y + player.h &&
+                        this.y + this.h > player.y);
+            }
+
+            offscreen() {
+                return this.x < -this.w;
+            }
+        }
+    </script>
+</body>
+</html>

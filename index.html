@@ -1,0 +1,1233 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Faucet</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding-right: 200px;
+        }
+        h1 {
+            color: #00ccff;
+            text-shadow: 0 0 10px #00ccff;
+            margin: 20px 0 10px;
+        }
+        .free-money-btn {
+            background-color: #00ff88;
+            color: #1a1a1a;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+        .free-money-btn:hover:not(:disabled) {
+            background-color: #00cc66;
+        }
+        .ads-link {
+            background-color: #ff4444;
+            color: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-decoration: none;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        .ads-link:hover:not(.disabled) {
+            background-color: #cc3333;
+        }
+        .ads-link.disabled {
+            background-color: #555;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .mining-btn {
+            background: linear-gradient(45deg, #ffcc00, #ff9900);
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .mining-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #ff9900, #ff6600);
+        }
+        .auto-earn-btn {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.3s;
+            text-align: center;
+        }
+        .auto-earn-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #00aaff, #00cc66);
+        }
+        .withdraw-btn {
+            background-color: #ff4444;
+            color: #e0e0e0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+        .withdraw-btn:hover:not(:disabled) {
+            background-color: #cc3333;
+        }
+        .wallet-info {
+            color: #00ff88;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            text-align: center;
+            white-space: pre-line;
+        }
+        .withdraw-btn:disabled,
+        .free-money-btn:disabled,
+        .ads-btn:disabled,
+        .airplane-btn:disabled,
+        .day-trade-btn:disabled,
+        .mining-btn:disabled,
+        .auto-earn-btn:disabled,
+        .game-btn:disabled,
+        .small-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .balance-graph {
+            background-color: #1a1a1a;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        .balance-graph h3 {
+            color: #00ff88;
+            margin: 0 0 10px;
+            font-size: 1.2em;
+        }
+        .balance-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .balance-bar-fill {
+            height: 100%;
+            background-color: #00ff88;
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        .balance-value {
+            color: #00ff88;
+            font-size: 1.5em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .line-graph {
+            background-color: #1a1a1a;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+        .line-graph h3 {
+            color: #00ff88;
+            margin: 0 0 10px;
+            font-size: 1.2em;
+        }
+        .line-graph svg {
+            width: 100%;
+            height: 100px;
+        }
+        .line-graph .balance-value {
+            color: #00ff88;
+            font-size: 1.5em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .history-panel {
+            position: fixed;
+            right: 0;
+            top: 600px;
+            width: 200px;
+            background-color: #2a2a2a;
+            border-left: 2px solid #00ff88;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 255, 136, 0.3);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-panel h3 {
+            color: #00ff88;
+            font-size: 1.2em;
+            margin: 0 0 10px;
+            text-align: center;
+        }
+        .history-panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: #e0e0e0;
+        }
+        .history-panel li {
+            padding: 5px 0;
+            border-bottom: 1px solid #3a3a3a;
+            font-size: 0.9em;
+        }
+        .history-panel li:last-child {
+            border-bottom: none;
+        }
+        footer {
+            margin-top: 20px;
+            color: #888;
+        }
+        .sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 200px;
+            height: 100%;
+            background-color: #2a2a2a;
+            border-left: 2px solid #00ccff;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0, 204, 255, 0.3);
+        }
+        .sidebar h2 {
+            color: #00ccff;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .sidebar select {
+            width: 100%;
+            padding: 10px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .sidebar select:focus {
+            outline: none;
+            border-color: #00aaff;
+        }
+        .ads-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00cc00, #00ccff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.5em;
+            transition: background 0.3s;
+            animation: blink 1.5s infinite;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+            margin-bottom: 10px;
+        }
+        .day-trade-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #ffcc00, #ff9900);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .day-trade-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #ff9900, #ff6600);
+        }
+        .airplane-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #ff4444, #ff6666);
+            color: #e0e0e0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .airplane-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #cc3333, #cc5555);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #00cc00, #00ccff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.5em;
+            transition: background 0.3s;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.5);
+            margin-bottom: 20px;
+        }
+        .login-btn:hover {
+            background: linear-gradient(45deg, #009900, #0099ff);
+        }
+        .game-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(45deg, #00cc00, #00ccff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+        .game-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #009900, #0099ff);
+        }
+        .small-btn {
+            width: 100%;
+            padding: 6px;
+            background: linear-gradient(45deg, #ff9900, #ffcc00);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(255, 153, 0, 0.5);
+        }
+        .small-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #ff6600, #ff9900);
+        }
+        .racing-btn {
+            padding: 6px 12px;
+            background: linear-gradient(45deg, #9900ff, #00ccff);
+            color: #1a1a1a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: background 0.3s;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+        .racing-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #6600cc, #0099ff);
+        }
+        .racing-btn:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        @keyframes blink {
+            0% { background: linear-gradient(45deg, #00cc00, #00ccff); }
+            50% { background: linear-gradient(45deg, #00ff00, #00ffff); }
+            100% { background: linear-gradient(45deg, #00cc00, #00ccff); }
+        }
+        .ads-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #009900, #0099ff);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00ccff;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .modal-content h2 {
+            color: #00ccff;
+            margin-top: 0;
+        }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+        }
+        .modal-content input[readonly] {
+            background-color: #4a4a4a;
+            cursor: not-allowed;
+        }
+        .modal-content button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .modal-content .submit-btn {
+            background-color: #00ccff;
+            color: #1a1a1a;
+        }
+        .modal-content .submit-btn:hover {
+            background-color: #00aaff;
+        }
+        .modal-content .cancel-btn {
+            background-color: #ff4444;
+            color: #e0e0e0;
+        }
+        .modal-content .cancel-btn:hover {
+            background-color: #cc3333;
+        }
+        .error {
+            color: #ff4444;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .ads-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2 id="lang-title">Selecionar Idioma</h2>
+        <select id="languageSelect" onchange="changeLanguage()">
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+        </select>
+        <button class="login-btn" onclick="openLoginModal()" id="login-btn">Entrar</button>
+        <button class="free-money-btn" id="free-money-btn" disabled>Dinheiro Grátis</button>
+        <button class="ads-btn" id="ads-btn" disabled>Ver Anúncios</button>
+        <button class="airplane-btn" id="airplane-btn" disabled>Jogo do Avião</button>
+        <button class="day-trade-btn" id="day-trade-btn" disabled>Day Trade</button>
+        <button class="game-btn" id="gameButton" disabled>Jogo da Nave</button>
+        <button class="small-btn" id="donkeyKongBtn" disabled>Donkey Kong</button>
+    </div>
+    <div class="history-panel" id="history-panel">
+        <h3 id="history-title">Histórico</h3>
+        <ul id="history-list"></ul>
+    </div>
+    <h1 id="title">Auto Faucet - Ganhe Reais</h1>
+    <div class="ads-container">
+        <a class="ads-link disabled" id="ads-link">Anúncios</a>
+        <button class="small-btn" onclick="openAdvertiseModal()" id="advertise-btn">Anúncio 🏆</button>
+    </div>
+    <div class="action-buttons">
+        <a class="mining-btn" id="mining-btn" disabled>Mineração com Processador</a>
+        <button class="auto-earn-btn" id="auto-earn-btn" disabled>Esqueça e Ganhe</button>
+        <button class="withdraw-btn" id="withdraw-btn" onclick="openWithdrawModal()" disabled>Saque via Pix</button>
+        <button class="racing-btn" id="racingGameBtn" disabled>Jogo de Corrida</button>
+    </div>
+    <div class="wallet-info" id="wallet-info"></div>
+    <div class="balance-graph" id="balance-graph">
+        <h3 id="graph-title">Valor Ganho em Reais</h3>
+        <div class="balance-bar">
+            <div class="balance-bar-fill" id="balance-bar-fill"></div>
+        </div>
+        <div class="balance-value" id="balance-value">R$ 0.000000</div>
+        <button class="small-btn" id="new-advertise-btn" disabled>Anúncio 🏆</button>
+    </div>
+    <div class="line-graph" id="line-graph">
+        <h3 id="line-graph-title">Histórico de Ganhos em Reais</h3>
+        <svg id="line-graph-svg"></svg>
+        <div class="balance-value" id="line-balance-value">R$ 0.000000</div>
+    </div>
+    <footer id="footer">© 2025 Auto Faucet. Todos os direitos reservados.</footer>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2 id="login-modal-title">Conectar Carteira</h2>
+            <input type="text" id="userName" placeholder="Nome (opcional)">
+            <input type="text" id="bnbAddress" placeholder="Endereço da Carteira BNB">
+            <input type="text" id="pixKey" placeholder="Chave Pix (CPF, Telefone, Email)">
+            <input type="text" id="contactInfo" placeholder="Gmail ou Telefone">
+            <div id="login-error-message" class="error"></div>
+            <button class="submit-btn" onclick="submitLogin()">Conectar</button>
+            <button class="cancel-btn" onclick="closeLoginModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <h2 id="modal-title">Saque via Pix</h2>
+            <input type="text" id="pixKey" placeholder="Chave Pix (Telefone, Gmail, etc.)">
+            <input type="text" id="userName" placeholder="Nome">
+            <input type="text" id="withdrawAmount" readonly>
+            <div id="error-message" class="error"></div>
+            <button class="submit-btn" onclick="submitWithdraw()">Enviar</button>
+            <button class="cancel-btn" onclick="closeWithdrawModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <div class="modal" id="advertiseModal">
+        <div class="modal-content">
+            <h2 id="advertise-modal-title">Anunciar no Site</h2>
+            <input type="text" id="adSiteName" placeholder="Nome do Site">
+            <input type="text" id="adSiteLink" placeholder="Link do Site">
+            <select id="adPlan">
+                <option value="1">Plano 1: R$ 10 = 400 cliques</option>
+                <option value="2">Plano 2: R$ 30 = 1500 cliques</option>
+            </select>
+            <input type="text" id="pixCpf" placeholder="CPF da Chave Pix" value="42786505828" readonly>
+            <input type="file" id="pixProof" accept="image/*,application/pdf">
+            <div id="advertise-error-message" class="error"></div>
+            <button class="submit-btn" onclick="submitAdvertise()">Enviar</button>
+            <button class="cancel-btn" onclick="closeAdvertiseModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+
+    <script>
+        const translations = {
+            pt: {
+                title: "Auto Faucet - Ganhe Reais",
+                freeMoneyBtn: "Dinheiro Grátis",
+                adsLink: "Anúncios",
+                walletBalance: "Saldo: R$ ",
+                withdrawBtn: "Saque via Pix",
+                modalTitle: "Saque via Pix",
+                pixKeyPlaceholder: "Chave Pix (Telefone, Gmail, etc.)",
+                namePlaceholder: "Nome",
+                amountPlaceholder: "Valor (R$)",
+                submitBtn: "Enviar",
+                cancelBtn: "Cancelar",
+                errorEmpty: "Por favor, preencha a Chave Pix e o Nome.",
+                errorBalance: "Saldo insuficiente. Mínimo para saque: R$ 0.30",
+                footer: "© 2025 Auto Faucet. Todos os direitos reservados.",
+                langTitle: "Selecionar Idioma",
+                adsBtn: "Ver Anúncios",
+                airplaneBtn: "Jogo do Avião",
+                graphTitle: "Valor Ganho em Reais",
+                lineGraphTitle: "Histórico de Ganhos em Reais",
+                miningBtn: "Mineração com Processador",
+                dayTradeBtn: "Day Trade",
+                loginBtn: "Entrar",
+                loginModalTitle: "Conectar Carteira",
+                userNamePlaceholder: "Nome (opcional)",
+                bnbPlaceholder: "Endereço da Carteira BNB",
+                loginPixPlaceholder: "Chave Pix (CPF, Telefone, Email)",
+                contactPlaceholder: "Gmail ou Telefone",
+                loginErrorEmpty: "Por favor, preencha pelo menos um campo (BNB, Pix ou Gmail/Telefone).",
+                loginSuccess: "Carteira conectada com sucesso!",
+                welcomeMessage: "Bem-vindo, ",
+                noWalletConnected: "Nenhuma carteira conectada",
+                historyTitle: "Histórico",
+                autoEarnBtn: "Esqueça e Ganhe",
+                gameBtn: "Jogo da Nave",
+                racingGameBtn: "Jogo de Corrida",
+                advertiseBtn: "Anúncio 🏆",
+                advertiseModalTitle: "Anunciar no Site",
+                adSiteNamePlaceholder: "Nome do Site",
+                adSiteLinkPlaceholder: "Link do Site",
+                pixCpfPlaceholder: "CPF da Chave Pix",
+                pixProofPlaceholder: "Comprovante Pix",
+                advertiseErrorEmpty: "Por favor, preencha todos os campos e envie o comprovante.",
+                advertiseErrorInvalid: "Comprovante inválido. Verifique CPF, valor e data.",
+                advertiseSuccess: "Anúncio enviado para validação!"
+            },
+            en: {
+                title: "Auto Faucet - Earn Reais",
+                freeMoneyBtn: "Free Money",
+                adsLink: "Ads",
+                walletBalance: "Balance: R$ ",
+                withdrawBtn: "Withdraw via Pix",
+                modalTitle: "Withdraw via Pix",
+                pixKeyPlaceholder: "Pix Key (Phone, Gmail, etc.)",
+                namePlaceholder: "Name",
+                amountPlaceholder: "Amount (R$)",
+                submitBtn: "Submit",
+                cancelBtn: "Cancel",
+                errorEmpty: "Please fill in the Pix Key and Name.",
+                errorBalance: "Insufficient balance. Minimum withdrawal: R$ 0.30",
+                footer: "© 2025 Auto Faucet. All rights reserved.",
+                langTitle: "Select Language",
+                adsBtn: "View Ads",
+                airplaneBtn: "Airplane Game",
+                graphTitle: "Amount Earned in Reais",
+                lineGraphTitle: "Earnings History in Reais",
+                miningBtn: "Mining with Processor",
+                dayTradeBtn: "Day Trade",
+                loginBtn: "Login",
+                loginModalTitle: "Connect Wallet",
+                userNamePlaceholder: "Name (optional)",
+                bnbPlaceholder: "BNB Wallet Address",
+                loginPixPlaceholder: "Pix Key (CPF, Phone, Email)",
+                contactPlaceholder: "Gmail or Phone",
+                loginErrorEmpty: "Please fill in at least one field (BNB, Pix, or Gmail/Phone).",
+                loginSuccess: "Wallet connected successfully!",
+                welcomeMessage: "Welcome, ",
+                noWalletConnected: "No wallet connected",
+                historyTitle: "History",
+                autoEarnBtn: "Forget and Earn",
+                gameBtn: "Spaceship Game",
+                racingGameBtn: "Racing Game",
+                advertiseBtn: "Ad 🏆",
+                advertiseModalTitle: "Advertise on the Site",
+                adSiteNamePlaceholder: "Site Name",
+                adSiteLinkPlaceholder: "Site Link",
+                pixCpfPlaceholder: "Pix CPF",
+                pixProofPlaceholder: "Pix Proof",
+                advertiseErrorEmpty: "Please fill in all fields and upload proof.",
+                advertiseErrorInvalid: "Invalid proof. Check CPF, amount, and date.",
+                advertiseSuccess: "Ad submitted for validation!"
+            },
+            es: {
+                title: "Auto Faucet - Gana Reales",
+                freeMoneyBtn: "Dinero Gratis",
+                adsLink: "Anuncios",
+                walletBalance: "Saldo: R$ ",
+                withdrawBtn: "Retirar vía Pix",
+                modalTitle: "Retirar vía Pix",
+                pixKeyPlaceholder: "Clave Pix (Teléfono, Gmail, etc.)",
+                namePlaceholder: "Nombre",
+                amountPlaceholder: "Monto (R$)",
+                submitBtn: "Enviar",
+                cancelBtn: "Cancelar",
+                errorEmpty: "Por favor, completa la Clave Pix y el Nombre.",
+                errorBalance: "Saldo insuficiente. Retiro mínimo: R$ 0.30",
+                footer: "© 2025 Auto Faucet. Todos los derechos reservados.",
+                langTitle: "Seleccionar Idioma",
+                adsBtn: "Ver Anuncios",
+                airplaneBtn: "Juego del Avión",
+                graphTitle: "Cantidad Ganada en Reales",
+                lineGraphTitle: "Historial de Ganancias en Reales",
+                miningBtn: "Minado con Procesador",
+                dayTradeBtn: "Day Trade",
+                loginBtn: "Iniciar Sesión",
+                loginModalTitle: "Conectar Cartera",
+                userNamePlaceholder: "Nombre (opcional)",
+                bnbPlaceholder: "Dirección de Cartera BNB",
+                loginPixPlaceholder: "Clave Pix (CPF, Teléfono, Email)",
+                contactPlaceholder: "Gmail o Teléfono",
+                loginErrorEmpty: "Por favor, completa al menos un campo (BNB, Pix o Gmail/Teléfono).",
+                loginSuccess: "¡Cartera conectada exitosamente!",
+                welcomeMessage: "Bienvenido, ",
+                noWalletConnected: "Ninguna cartera conectada",
+                historyTitle: "Historial",
+                autoEarnBtn: "Olvida y Gana",
+                gameBtn: "Juego de la Nave",
+                racingGameBtn: "Juego de Carrera",
+                advertiseBtn: "Anuncio 🏆",
+                advertiseModalTitle: "Anunciar en el Sitio",
+                adSiteNamePlaceholder: "Nombre del Sitio",
+                adSiteLinkPlaceholder: "Enlace del Sitio",
+                pixCpfPlaceholder: "CPF de Pix",
+                pixProofPlaceholder: "Comprobante Pix",
+                advertiseErrorEmpty: "Por favor, completa todos los campos y sube el comprobante.",
+                advertiseErrorInvalid: "Comprobante inválido. Verifica CPF, monto y fecha.",
+                advertiseSuccess: "¡Anuncio enviado para validación!"
+            },
+            fr: {
+                title: "Auto Faucet - Gagnez des Reais",
+                freeMoneyBtn: "Argent Gratuit",
+                adsLink: "Annonces",
+                walletBalance: "Solde: R$ ",
+                withdrawBtn: "Retirer via Pix",
+                modalTitle: "Retirer via Pix",
+                pixKeyPlaceholder: "Clé Pix (Téléphone, Gmail, etc.)",
+                namePlaceholder: "Nom",
+                amountPlaceholder: "Montant (R$)",
+                submitBtn: "Envoyer",
+                cancelBtn: "Annuler",
+                errorEmpty: "Veuillez remplir la Clé Pix et le Nom.",
+                errorBalance: "Solde insuffisant. Retrait minimum : R$ 0.30",
+                footer: "© 2025 Auto Faucet. Tous droits réservés.",
+                langTitle: "Sélectionner la Langue",
+                adsBtn: "Voir les Annonces",
+                airplaneBtn: "Jeu de l'Avion",
+                graphTitle: "Montant Gagné en Reais",
+                lineGraphTitle: "Historique des Gains en Reais",
+                miningBtn: "Minage avec Processeur",
+                dayTradeBtn: "Day Trade",
+                loginBtn: "Connexion",
+                loginModalTitle: "Connecter le Portefeuille",
+                userNamePlaceholder: "Nom (facultatif)",
+                bnbPlaceholder: "Adresse du Portefeuille BNB",
+                loginPixPlaceholder: "Clé Pix (CPF, Téléphone, Email)",
+                contactPlaceholder: "Gmail ou Téléphone",
+                loginErrorEmpty: "Veuillez remplir au moins un champ (BNB, Pix ou Gmail/Téléphone).",
+                loginSuccess: "Portefeuille connecté avec succès !",
+                welcomeMessage: "Bienvenue, ",
+                noWalletConnected: "Aucun portefeuille connecté",
+                historyTitle: "Historique",
+                autoEarnBtn: "Oubliez et Gagnez",
+                gameBtn: "Jeu de Vaisseau",
+                racingGameBtn: "Jeu de Course",
+                advertiseBtn: "Annonce 🏆",
+                advertiseModalTitle: "Annoncer sur le Site",
+                adSiteNamePlaceholder: "Nom du Site",
+                adSiteLinkPlaceholder: "Lien du Site",
+                pixCpfPlaceholder: "CPF Pix",
+                pixProofPlaceholder: "Preuve Pix",
+                advertiseErrorEmpty: "Veuillez remplir tous les champs et télécharger la preuve.",
+                advertiseErrorInvalid: "Preuve invalide. Vérifiez CPF, montant et date.",
+                advertiseSuccess: "Annonce soumise pour validation !"
+            },
+            de: {
+                title: "Auto Faucet - Verdiene Reais",
+                freeMoneyBtn: "Kostenloses Geld",
+                adsLink: "Anzeigen",
+                walletBalance: "Kontostand: R$ ",
+                withdrawBtn: "Auszahlung via Pix",
+                modalTitle: "Auszahlung via Pix",
+                pixKeyPlaceholder: "Pix-Schlüssel (Telefon, Gmail, etc.)",
+                namePlaceholder: "Name",
+                amountPlaceholder: "Betrag (R$)",
+                submitBtn: "Senden",
+                cancelBtn: "Abbrechen",
+                errorEmpty: "Bitte füllen Sie den Pix-Schlüssel und den Namen aus.",
+                errorBalance: "Unzureichendes Guthaben. Mindestauszahlung: R$ 0.30",
+                footer: "© 2025 Auto Faucet. Alle Rechte vorbehalten.",
+                langTitle: "Sprache Auswählen",
+                adsBtn: "Anzeigen Ansehen",
+                airplaneBtn: "Flugzeugspiel",
+                graphTitle: "Erworbener Betrag in Reais",
+                lineGraphTitle: "Verlauf der Einnahmen in Reais",
+                miningBtn: "Mining mit Prozessor",
+                dayTradeBtn: "Day Trade",
+                loginBtn: "Anmelden",
+                loginModalTitle: "Wallet Verbinden",
+                userNamePlaceholder: "Name (optional)",
+                bnbPlaceholder: "BNB Wallet-Adresse",
+                loginPixPlaceholder: "Pix-Schlüssel (CPF, Telefon, Email)",
+                contactPlaceholder: "Gmail oder Telefon",
+                loginErrorEmpty: "Bitte füllen Sie mindestens ein Feld aus (BNB, Pix oder Gmail/Telefon).",
+                loginSuccess: "Wallet erfolgreich verbunden!",
+                welcomeMessage: "Willkommen, ",
+                noWalletConnected: "Kein Wallet verbunden",
+                historyTitle: "Verlauf",
+                autoEarnBtn: "Vergessen und Verdienen",
+                gameBtn: "Raumschiffspiel",
+                racingGameBtn: "Rennspiel",
+                advertiseBtn: "Anzeige 🏆",
+                advertiseModalTitle: "Auf der Seite werben",
+                adSiteNamePlaceholder: "Name der Seite",
+                adSiteLinkPlaceholder: "Link der Seite",
+                pixCpfPlaceholder: "Pix CPF",
+                pixProofPlaceholder: "Pix-Nachweis",
+                advertiseErrorEmpty: "Bitte füllen Sie alle Felder aus und laden Sie den Nachweis hoch.",
+                advertiseErrorInvalid: "Ungültiger Nachweis. Überprüfen Sie CPF, Betrag und Datum.",
+                advertiseSuccess: "Anzeige zur Validierung eingereicht!"
+            }
+        };
+
+        let walletBalance = parseFloat(localStorage.getItem('walletBalance')) || 0;
+        if (isNaN(walletBalance)) {
+            walletBalance = 0;
+            localStorage.setItem('walletBalance', walletBalance);
+        }
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        let ads = JSON.parse(localStorage.getItem('ads')) || [];
+
+        function isLoggedIn() {
+            return !!(localStorage.getItem('bnbAddress') || localStorage.getItem('pixKey') || localStorage.getItem('contactInfo'));
+        }
+
+        function updateWalletInfo() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            const userName = localStorage.getItem('userName');
+            const contactInfo = localStorage.getItem('contactInfo');
+            let userDisplay = userName || contactInfo || '';
+            if (userDisplay) {
+                document.getElementById('wallet-info').textContent = 
+                    `${lang.welcomeMessage}${userDisplay}\n${lang.walletBalance}${walletBalance.toFixed(6)}`;
+            } else {
+                document.getElementById('wallet-info').textContent = 
+                    `${lang.noWalletConnected}\n${lang.walletBalance}${walletBalance.toFixed(6)}`;
+            }
+            document.getElementById('balance-value').textContent = `R$ ${walletBalance.toFixed(6)}`;
+            document.getElementById('line-balance-value').textContent = `R$ ${walletBalance.toFixed(6)}`;
+            const barFill = document.getElementById('balance-bar-fill');
+            const widthPercent = Math.min(walletBalance * 1000, 100);
+            barFill.style.width = `${widthPercent}%`;
+            updateLineGraph();
+
+            const loggedIn = isLoggedIn();
+            const freeMoneyBtn = document.getElementById('free-money-btn');
+            const adsBtn = document.getElementById('ads-btn');
+            const airplaneBtn = document.getElementById('airplane-btn');
+            const dayTradeBtn = document.getElementById('day-trade-btn');
+            const withdrawBtn = document.getElementById('withdraw-btn');
+            const adsLink = document.getElementById('ads-link');
+            const miningBtn = document.getElementById('mining-btn');
+            const autoEarnBtn = document.getElementById('auto-earn-btn');
+            const gameButton = document.getElementById('gameButton');
+            const donkeyKongBtn = document.getElementById('donkeyKongBtn');
+            const racingGameBtn = document.getElementById('racingGameBtn');
+            const advertiseBtn = document.getElementById('advertise-btn');
+            const newAdvertiseBtn = document.getElementById('new-advertise-btn');
+
+            freeMoneyBtn.disabled = !loggedIn;
+            adsBtn.disabled = !loggedIn;
+            airplaneBtn.disabled = !loggedIn;
+            dayTradeBtn.disabled = !loggedIn;
+            withdrawBtn.disabled = !loggedIn || walletBalance < 0.30 || !localStorage.getItem('bnbAddress');
+            advertiseBtn.disabled = !loggedIn;
+            autoEarnBtn.disabled = !loggedIn;
+            gameButton.disabled = !loggedIn;
+            donkeyKongBtn.disabled = !loggedIn;
+            racingGameBtn.disabled = !loggedIn;
+            newAdvertiseBtn.disabled = !loggedIn;
+
+            if (loggedIn) {
+                adsLink.classList.remove('disabled');
+                adsLink.href = 'ads.html';
+                adsLink.onclick = () => window.open('ads.html', '_blank');
+                miningBtn.disabled = false;
+                miningBtn.href = 'mining.html';
+                miningBtn.onclick = null;
+                autoEarnBtn.onclick = () => window.location.href = 'auto_earn.html';
+                gameButton.onclick = () => window.location.href = 'index.html';
+                donkeyKongBtn.onclick = () => window.location.href = 'donge_conge.html';
+                racingGameBtn.onclick = () => window.location.href = 'jogo_de_corrida.html';
+                newAdvertiseBtn.onclick = () => window.location.href = 'anunciar.html';
+            } else {
+                adsLink.classList.add('disabled');
+                adsLink.removeAttribute('href');
+                adsLink.onclick = (e) => e.preventDefault();
+                miningBtn.disabled = true;
+                miningBtn.removeAttribute('href');
+                miningBtn.onclick = (e) => e.preventDefault();
+                autoEarnBtn.onclick = null;
+                gameButton.onclick = null;
+                donkeyKongBtn.onclick = null;
+                racingGameBtn.onclick = null;
+                newAdvertiseBtn.onclick = null;
+            }
+
+            if (loggedIn) {
+                freeMoneyBtn.onclick = () => window.location.href = 'free_money.html';
+                adsBtn.onclick = () => window.open('ads.html', '_blank');
+                airplaneBtn.onclick = () => window.location.href = 'airplane_game.html';
+                dayTradeBtn.onclick = () => window.location.href = 'day_trade.html';
+            } else {
+                freeMoneyBtn.onclick = null;
+                adsBtn.onclick = null;
+                airplaneBtn.onclick = null;
+                dayTradeBtn.onclick = null;
+            }
+
+            localStorage.setItem('walletBalance', walletBalance);
+            updateHistoryPanel();
+        }
+
+        function updateLineGraph() {
+            const svg = document.getElementById('line-graph-svg');
+            svg.innerHTML = '';
+            const width = 260;
+            const height = 80;
+            const maxY = Math.max(walletBalance, 0.3);
+            const y = height - (walletBalance / maxY) * height;
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', 0);
+            line.setAttribute('y1', y);
+            line.setAttribute('x2', width);
+            line.setAttribute('y2', y);
+            line.setAttribute('stroke', '#00ff88');
+            line.setAttribute('stroke-width', '2');
+            svg.appendChild(line);
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', 0);
+            xAxis.setAttribute('y1', height);
+            xAxis.setAttribute('x2', width);
+            xAxis.setAttribute('y2', height);
+            xAxis.setAttribute('stroke', '#e0e0e0');
+            xAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(xAxis);
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', 0);
+            yAxis.setAttribute('y1', 0);
+            yAxis.setAttribute('x2', 0);
+            yAxis.setAttribute('y2', height);
+            yAxis.setAttribute('stroke', '#e0e0e0');
+            yAxis.setAttribute('stroke-width', '1');
+            svg.appendChild(yAxis);
+        }
+
+        function updateHistoryPanel() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            document.getElementById('history-title').textContent = lang.historyTitle;
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            history.forEach(entry => {
+                const date = new Date(entry.timestamp);
+                const formattedDate = date.toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                const li = document.createElement('li');
+                const displayMessage = entry.type === 'login' 
+                    ? `Login: R$ ${entry.balance.toFixed(6)}`
+                    : entry.message;
+                li.textContent = `${formattedDate}: ${displayMessage}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        function openLoginModal() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            document.getElementById('login-modal-title').textContent = lang.loginModalTitle;
+            document.getElementById('userName').placeholder = lang.userNamePlaceholder;
+            document.getElementById('bnbAddress').placeholder = lang.bnbPlaceholder;
+            document.getElementById('pixKey').placeholder = lang.loginPixPlaceholder;
+            document.getElementById('contactInfo').placeholder = lang.contactPlaceholder;
+            document.getElementById('userName').value = '';
+            document.getElementById('bnbAddress').value = '';
+            document.getElementById('pixKey').value = '';
+            document.getElementById('contactInfo').value = '';
+            document.getElementById('login-error-message').textContent = '';
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        function submitLogin() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            const userName = document.getElementById('userName').value.trim();
+            const bnbAddress = document.getElementById('bnbAddress').value.trim();
+            const pixKey = document.getElementById('pixKey').value.trim();
+            const contactInfo = document.getElementById('contactInfo').value.trim();
+
+            if (!bnbAddress && !pixKey && !contactInfo) {
+                document.getElementById('login-error-message').textContent = lang.loginErrorEmpty;
+                return;
+            }
+
+            if (userName) localStorage.setItem('userName', userName);
+            if (bnbAddress) localStorage.setItem('bnbAddress', bnbAddress);
+            if (pixKey) localStorage.setItem('pixKey', pixKey);
+            if (contactInfo) localStorage.setItem('contactInfo', contactInfo);
+
+            history.push({
+                timestamp: new Date().toISOString(),
+                message: `Login realizado`,
+                type: 'login',
+                balance: walletBalance
+            });
+            localStorage.setItem('history', JSON.stringify(history));
+            localStorage.setItem('walletBalance', walletBalance);
+
+            document.getElementById('login-error-message').textContent = lang.loginSuccess;
+            document.getElementById('login-error-message').style.color = '#00ff88';
+            setTimeout(() => {
+                closeLoginModal();
+                document.getElementById('login-error-message').style.color = '#ff4444';
+                updateWalletInfo();
+            }, 1000);
+        }
+
+        function openWithdrawModal() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            document.getElementById('modal-title').textContent = lang.modalTitle;
+            document.getElementById('pixKey').placeholder = lang.pixKeyPlaceholder;
+            document.getElementById('userName').placeholder = lang.namePlaceholder;
+            document.getElementById('pixKey').value = localStorage.getItem('pixKey') || '';
+            document.getElementById('userName').value = localStorage.getItem('userName') || '';
+            document.getElementById('withdrawAmount').value = `R$ ${walletBalance.toFixed(6)}`;
+            document.getElementById('error-message').textContent = '';
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        function submitWithdraw() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            const pixKey = document.getElementById('pixKey').value.trim();
+            const userName = document.getElementById('userName').value.trim();
+
+            if (!pixKey || !userName) {
+                document.getElementById('error-message').textContent = lang.errorEmpty;
+                return;
+            }
+
+            if (walletBalance < 0.30) {
+                document.getElementById('error-message').textContent = lang.errorBalance;
+                return;
+            }
+
+            const withdrawnAmount = walletBalance;
+            const subject = encodeURIComponent('Saque via Pix - Auto Faucet');
+            const body = encodeURIComponent(`Nome: ${userName}\nChave Pix: ${pixKey}\nValor: R$ ${walletBalance.toFixed(6)}`);
+            window.location.href = `mailto:zuzukoficial@gmail.com?subject=${subject}&body=${body}`;
+
+            walletBalance = 0;
+            localStorage.setItem('walletBalance', walletBalance);
+            localStorage.setItem('balance', walletBalance);
+
+            history.push({
+                timestamp: new Date().toISOString(),
+                message: `Saque de R$ ${withdrawnAmount.toFixed(6)} via Pix`,
+                type: 'withdraw',
+                balance: withdrawnAmount
+            });
+            localStorage.setItem('history', JSON.stringify(history));
+
+            updateWalletInfo();
+            closeWithdrawModal();
+        }
+
+        function openAdvertiseModal() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            document.getElementById('advertise-modal-title').textContent = lang.advertiseModalTitle;
+            document.getElementById('adSiteName').placeholder = lang.adSiteNamePlaceholder;
+            document.getElementById('adSiteLink').placeholder = lang.adSiteLinkPlaceholder;
+            document.getElementById('pixCpf').placeholder = lang.pixCpfPlaceholder;
+            document.getElementById('adSiteName').value = '';
+            document.getElementById('adSiteLink').value = '';
+            document.getElementById('adPlan').value = '1';
+            document.getElementById('pixProof').value = '';
+            document.getElementById('advertise-error-message').textContent = '';
+            document.getElementById('advertiseModal').style.display = 'flex';
+        }
+
+        function closeAdvertiseModal() {
+            document.getElementById('advertiseModal').style.display = 'none';
+        }
+
+        function submitAdvertise() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            const siteName = document.getElementById('adSiteName').value.trim();
+            const siteLink = document.getElementById('adSiteLink').value.trim();
+            const plan = document.getElementById('adPlan').value;
+            const pixCpf = document.getElementById('pixCpf').value.trim();
+            const pixProof = document.getElementById('pixProof').files[0];
+
+            if (!siteName || !siteLink || !pixProof) {
+                document.getElementById('advertise-error-message').textContent = lang.advertiseErrorEmpty;
+                return;
+            }
+
+            const expectedCpf = '42786505828';
+            const expectedAmount = plan === '1' ? 10 : 30;
+            const expectedClicks = plan === '1' ? 400 : 1500;
+            const today = new Date().toISOString().split('T')[0];
+
+            if (pixCpf !== expectedCpf) {
+                document.getElementById('advertise-error-message').textContent = lang.advertiseErrorInvalid;
+                return;
+            }
+
+            const ad = {
+                id: ads.length + 1,
+                siteName,
+                siteLink,
+                clicks: 0,
+                maxClicks: expectedClicks,
+                advertiser: localStorage.getItem('contactInfo') || localStorage.getItem('userName') || 'Anonymous',
+                amount: expectedAmount,
+                status: 'pending'
+            };
+
+            ads.push(ad);
+            localStorage.setItem('ads', JSON.stringify(ads));
+
+            history.push({
+                timestamp: new Date().toISOString(),
+                message: `Anúncio submetido: ${siteName} (R$ ${expectedAmount})`,
+                type: 'advertise'
+            });
+            localStorage.setItem('history', JSON.stringify(history));
+
+            const subject = encodeURIComponent('Comprovante Pix - Anúncio');
+            const body = encodeURIComponent(`Nome do Site: ${siteName}\nLink: ${siteLink}\nPlano: R$ ${expectedAmount}\nCPF Pix: ${pixCpf}`);
+            window.location.href = `mailto:zuzukoficial@gmail.com?subject=${subject}&body=${body}`;
+
+            document.getElementById('advertise-error-message').textContent = lang.advertiseSuccess;
+            document.getElementById('advertise-error-message').style.color = '#00ff88';
+            setTimeout(() => {
+                closeAdvertiseModal();
+                document.getElementById('advertise-error-message').style.color = '#ff4444';
+            }, 1000);
+        }
+
+        function changeLanguage() {
+            const lang = translations[document.getElementById('languageSelect').value];
+            localStorage.setItem('language', document.getElementById('languageSelect').value);
+            document.getElementById('title').textContent = lang.title;
+            document.getElementById('free-money-btn').textContent = lang.freeMoneyBtn;
+            document.getElementById('ads-link').textContent = lang.adsLink;
+            document.getElementById('withdraw-btn').textContent = lang.withdrawBtn;
+            document.getElementById('footer').textContent = lang.footer;
+            document.getElementById('lang-title').textContent = lang.langTitle;
+            document.getElementById('ads-btn').textContent = lang.adsBtn;
+            document.getElementById('airplane-btn').textContent = lang.airplaneBtn;
+            document.getElementById('day-trade-btn').textContent = lang.dayTradeBtn;
+            document.getElementById('graph-title').textContent = lang.graphTitle;
+            document.getElementById('line-graph-title').textContent = lang.lineGraphTitle;
+            document.getElementById('mining-btn').textContent = lang.miningBtn;
+            document.getElementById('login-btn').textContent = lang.loginBtn;
+            document.getElementById('history-title').textContent = lang.historyTitle;
+            document.getElementById('auto-earn-btn').textContent = lang.autoEarnBtn;
+            document.getElementById('gameButton').textContent = lang.gameBtn;
+            document.getElementById('racingGameBtn').textContent = lang.racingGameBtn;
+            document.getElementById('advertise-btn').textContent = lang.advertiseBtn;
+            document.getElementById('new-advertise-btn').textContent = lang.advertiseBtn;
+            updateWalletInfo();
+        }
+
+        document.getElementById('gameButton').addEventListener('click', () => {
+            if (!document.getElementById('gameButton').disabled) {
+                window.location.href = 'index.html';
+            }
+        });
+
+        updateWalletInfo();
+        document.getElementById('languageSelect').value = localStorage.getItem('language') || 'pt';
+        changeLanguage();
+    </script>
+</body>
+</html>
+
+npm install netlify-cli -g
+netlify functions:create
+/.netlify/functions/FUNCTION-NAME

@@ -1,0 +1,470 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esqueça e Ganhe - Auto Faucet</title>
+    <script>
+        (function(vpwy){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = vpwy || {};
+            s.src = "\/\/glyparuha.com\/b\/XeV.szd\/Gvl\/0PY\/Wlcq\/qeSmX9\/u-ZRUolVkEPRT\/YcyRN\/jFAY4KMMTPI\/tNNNjzID2GMFDzgSxzMdwa";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+        })({})
+    </script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #00ccff;
+            text-shadow: 0 0 15px rgba(0, 204, 255, 0.7);
+            font-size: 2.5em;
+            margin: 20px 0;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .wallet-info {
+            color: #00ff88;
+            font-size: 1.4em;
+            margin: 20px 0;
+            text-align: center;
+            background: rgba(0, 255, 136, 0.1);
+            padding: 10px 20px;
+            border-radius: 8px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .progress-panel {
+            background: #2a2a2a;
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 25px;
+            width: 350px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .progress-panel:hover {
+            transform: translateY(-5px);
+        }
+
+        .progress-panel h3 {
+            color: #00ff88;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 35px;
+            background: #3a3a3a;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #00ccff;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            width: 0;
+            transition: width 0.2s ease;
+        }
+
+        .balance-value {
+            margin-top: 10px;
+            font-size: 1.1em;
+            color: #e0e0e0;
+        }
+
+        .back-btn {
+            background: #ff4444;
+            color: #ffffff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #cc3333;
+            transform: scale(1.05);
+        }
+
+        .ads-section {
+            width: 350px;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .ad-container {
+            background: #2a2a2a;
+            border: 2px solid #00ccff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 204, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .ad-container:hover {
+            transform: translateY(-3px);
+        }
+
+        .ad-container h4 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .ad-link {
+            background: linear-gradient(45deg, #00ccff, #00ff88);
+            color: #1a1a1a;
+            padding: 12px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .ad-link:hover {
+            background: linear-gradient(45deg, #00aaff, #00cc66);
+            transform: scale(1.05);
+        }
+
+        .top-ad {
+            width: 100%;
+            max-width: 650px;
+            background: #2a2a2a;
+            border: 3px solid #00ff88;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.2);
+            animation: fadeIn 1s ease-in;
+        }
+
+        .top-ad h4 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: #888;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .progress-panel, .ads-section, .top-ad {
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .wallet-info {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-ad">
+        <h4 id="top-ad-title">Anúncio</h4>
+        <a href="https://frigidtwist.com/29xLC5" target="_blank" class="ad-link" id="top-ad-link">Visitar Anúncio</a>
+    </div>
+    <h1 id="title">Esqueça e Ganhe</h1>
+    <div class="wallet-info" id="wallet-info">Saldo: R$ 0.000000</div>
+    <div class="progress-panel">
+        <h3 id="progress-title">Próximo Ganho Automático</h3>
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+        <div class="balance-value" id="progress-value">0%</div>
+    </div>
+    <div class="ads-section">
+        <div class="ad-container">
+            <h4 id="ad1-title">Anúncio 1</h4>
+            <a href="https://frigidtwist.com/b/3cV/0/P.3Hp_v_b/mtVCJvZ/Dz0V2/MVjlcKzeNQDQUE0BL/TMYRymNqzaM/0nNCTgUv" target="_blank" class="ad-link" id="ad1-link">Visitar Anúncio</a>
+        </div>
+        <div class="ad-container">
+            <h4 id="ad2-title">Anúncio 2</h4>
+            <div id="ad2-content"></div>
+        </div>
+        <div class="ad-container">
+            <h4 id="ad3-title">Anúncio 3</h4>
+            <div id="ad3-content"></div>
+        </div>
+    </div>
+    <a href="index.html" class="back-btn" id="back-btn">Voltar</a>
+    <footer id="footer">© 2025 Auto Faucet. Todos os direitos reservados.</footer>
+
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+            return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+
+    <script>
+        (function(bxsn){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = bxsn || {};
+            s.src = "\/\/glyparuha.com\/biXpVXs.d\/GdlX0GYkWGcH\/-eam\/9luuZWU-lKk\/PSTSYKydNazFEh2_NfD\/Awt\/NujuIa3YM\/TrYk0\/M\/Ql";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+        })({})
+    </script>
+    <script>
+        (function(boriv){
+            var d = document,
+                s = d.createElement('script'),
+                l = d.scripts[d.scripts.length - 1];
+            s.settings = boriv || {};
+            s.src = "\/\/glyparuha.com\/b\/XtV.smdsG\/lY0\/Y\/WAcn\/Ke\/mf9\/uWZtUzl-ktPsTFYNy\/NBzUE\/1JMuTJMstTNSjhI\/3DMNTlU-x\/NkAC";
+            s.async = true;
+            s.referrerPolicy = 'no-referrer-when-downgrade';
+            l.parentNode.insertBefore(s, l);
+        })({})
+    </script>
+
+    <script>
+        const translations = {
+            pt: {
+                title: "Esqueça e Ganhe",
+                walletBalance: "Saldo: R$ ",
+                progressTitle: "Próximo Ganho Automático",
+                backBtn: "Voltar",
+                footer: "© 2025 Auto Faucet. Todos os direitos reservados.",
+                topAdTitle: "Anúncio",
+                ad1Title: "Anúncio 1",
+                ad2Title: "Anúncio 2",
+                ad3Title: "Anúncio 3",
+                adLink: "Visitar Anúncio"
+            },
+            en: {
+                title: "Forget and Earn",
+                walletBalance: "Balance: R$ ",
+                progressTitle: "Next Automatic Earning",
+                backBtn: "Back",
+                footer: "© 2025 Auto Faucet. All rights reserved.",
+                topAdTitle: "Advertisement",
+                ad1Title: "Advertisement 1",
+                ad2Title: "Advertisement 2",
+                ad3Title: "Advertisement 3",
+                adLink: "Visit Ad"
+            },
+            es: {
+                title: "Olvida y Gana",
+                walletBalance: "Saldo: R$ ",
+                progressTitle: "Próxima Ganancia Automática",
+                backBtn: "Volver",
+                footer: "© 2025 Auto Faucet. Todos los derechos reservados.",
+                topAdTitle: "Anuncio",
+                ad1Title: "Anuncio 1",
+                ad2Title: "Anuncio 2",
+                ad3Title: "Anuncio 3",
+                adLink: "Visitar Anuncio"
+            },
+            fr: {
+                title: "Oubliez et Gagnez",
+                walletBalance: "Solde: R$ ",
+                progressTitle: "Prochain Gain Automatique",
+                backBtn: "Retour",
+                footer: "© 2025 Auto Faucet. Tous droits réservés.",
+                topAdTitle: "Publicité",
+                ad1Title: "Publicité 1",
+                ad2Title: "Publicité 2",
+                ad3Title: "Publicité 3",
+                adLink: "Visiter la Publicité"
+            },
+            de: {
+                title: "Vergessen und Verdienen",
+                walletBalance: "Kontostand: R$ ",
+                progressTitle: "Nächster Automatischer Verdienst",
+                backBtn: "Zurück",
+                footer: "© 2025 Auto Faucet. Alle Rechte vorbehalten.",
+                topAdTitle: "Werbung",
+                ad1Title: "Werbung 1",
+                ad2Title: "Werbung 2",
+                ad3Title: "Werbung 3",
+                adLink: "Werbung Besuchen"
+            }
+        };
+
+        let walletBalance = parseFloat(localStorage.getItem('walletBalance')) || 0;
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        const EARN_AMOUNT = 0.00001; // Atualizado para R$ 0.00001
+        const EARN_INTERVAL = 60 * 1000; // 1 minuto em milissegundos
+        let progress = 0;
+
+        function updateWalletInfo() {
+            const lang = translations[localStorage.getItem('language') || 'pt'];
+            document.getElementById('wallet-info').textContent = 
+                `${lang.walletBalance}${walletBalance.toFixed(8)}`;
+        }
+
+        function updateProgressBar() {
+            progress += (100 / (EARN_INTERVAL / 100)); // Incrementa a cada 100ms
+            if (progress > 100) progress = 100;
+            document.getElementById('progress-bar-fill').style.width = `${progress}%`;
+            document.getElementById('progress-value').textContent = `${Math.round(progress)}%`;
+        }
+
+        function earnMoney() {
+            walletBalance += EARN_AMOUNT;
+            localStorage.setItem('walletBalance', walletBalance);
+            history.push({
+                timestamp: new Date().toISOString(),
+                message: `Ganho automático: R$ ${EARN_AMOUNT.toFixed(8)}`,
+                type: 'auto_earn',
+                balance: walletBalance
+            });
+            localStorage.setItem('history', JSON.stringify(history));
+            updateWalletInfo();
+            progress = 0; // Reinicia a barra de progresso
+            // Atualiza a página após o ganho
+            window.location.reload();
+        }
+
+        function startEarning() {
+            updateProgressBar();
+            if (progress >= 100) {
+                earnMoney();
+            }
+            setTimeout(startEarning, 100); // Atualiza a cada 100ms
+        }
+
+        function changeLanguage() {
+            const lang = translations[localStorage.getItem('language') || 'pt'];
+            document.getElementById('title').textContent = lang.title;
+            document.getElementById('progress-title').textContent = lang.progressTitle;
+            document.getElementById('back-btn').textContent = lang.backBtn;
+            document.getElementById('footer').textContent = lang.footer;
+            document.getElementById('top-ad-title').textContent = lang.topAdTitle;
+            document.getElementById('ad1-title').textContent = lang.ad1Title;
+            document.getElementById('ad2-title').textContent = lang.ad2Title;
+            document.getElementById('ad3-title').textContent = lang.ad3Title;
+            document.getElementById('top-ad-link').textContent = lang.adLink;
+            document.getElementById('ad1-link').textContent = lang.adLink;
+            updateWalletInfo();
+        }
+
+        updateWalletInfo();
+        changeLanguage();
+        startEarning();
+    </script>
+</body>
+</html>
